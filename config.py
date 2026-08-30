@@ -1,7 +1,5 @@
 import os
 import random
-
-HF_TOKEN = os.getenv("HF_TOKEN", "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")
 HF_MODEL = os.getenv("HF_MODEL", "meta-llama/Llama-3.2-3B-Instruct")
 TELEMETRY_FILE = "telemetry.jsonl"
 
