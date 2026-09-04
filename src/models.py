@@ -174,6 +174,7 @@ class UserTelemetry:
     """Tracks user behavior and communication patterns."""
     
     alias: str = ""
+    session_id: str = ""
     first_seen: float = 0.0
     message_count: int = 0
     total_chars: int = 0
@@ -191,12 +192,13 @@ class UserTelemetry:
     vocabulary: list[str] = field(default_factory=list)
     
     @classmethod
-    def new(cls, alias: str) -> "UserTelemetry":
+    def new(cls, alias: str, session_id: str = "") -> "UserTelemetry":
         """Create a fresh telemetry tracker for a user."""
         import time
         
         return cls(
             alias=alias,
+            session_id=session_id,
             first_seen=time.time(),
             message_count=0,
             total_chars=0,

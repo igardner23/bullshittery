@@ -266,6 +266,13 @@
                 person.textContent = name;
                 if (isSelectable) {
                     person.addEventListener('click', () => {
+                        // Log roster selection for telemetry
+                        socket.emit('ui_interaction', {
+                            event_type: 'selection',
+                            element_id: 'roster-' + name,
+                            element_type: 'roster_item',
+                            context: { selected_user: name, purpose: 'private_message' }
+                        });
                         recipient.value = name;
                         document.querySelectorAll('.roster-person').forEach((item) => item.classList.remove('selected'));
                         person.classList.add('selected');
@@ -432,6 +439,15 @@
         $('enter-button').addEventListener('click', () => {
             state.username = $('username-input').value.trim() || `Anon_${Math.floor(100 + Math.random() * 900)}`;
             const profile = { q1: $('q1').value, q2: $('q2').value, q3: $('q3').value, q4: $('q4').value };
+            
+            // Log consent and profile submission
+            socket.emit('ui_interaction', {
+                event_type: 'form_submit',
+                element_id: 'enter-button',
+                element_type: 'button',
+                context: { step: 'profile_complete', username: state.username }
+            });
+            
             socket.emit('join_lobby', { username: state.username, profile, consent_given: true });
             $('consent-gate').classList.add('hidden');
             $('app-shell').classList.remove('hidden');
@@ -441,6 +457,15 @@
             const input = $('chat-input');
             const text = input.value.trim();
             if (!text) return;
+            
+            // Log chat message send
+            socket.emit('ui_interaction', {
+                event_type: 'message_send',
+                element_id: 'chat-form',
+                element_type: 'form',
+                context: { message_length: text.length, phase: state.phase }
+            });
+            
             socket.emit('chat_message', { text });
             appendMessage(text, state.username || 'You', 'human');
             input.value = '';
@@ -451,10 +476,36 @@
             const input = $('private-input');
             const text = input.value.trim();
             if (!recipient || !text) return;
+            
+            // Log private message send
+            socket.emit('ui_interaction', {
+                event_type: 'private_message_send',
+                element_id: 'private-form',
+                element_type: 'form',
+                context: { recipient, message_length: text.length }
+            });
+            
             socket.emit('private_message', { recipient, text });
             appendMessage(`to ${recipient}: ${text}`, 'private · you', 'human');
             input.value = '';
         });
+        
+        // Log button clicks for game actions
+        function trackActionClick(actionType, value, elementId) {
+            socket.emit('ui_interaction', {
+                event_type: 'click',
+                element_id: elementId || ('action-' + actionType),
+                element_type: 'button',
+                context: { action: actionType, value, phase: state.phase, game_number: state.gameNumber }
+            });
+        }
+        
+        // Override submitAction to track clicks
+        const originalSubmitAction = submitAction;
+        submitAction = function(action, value) {
+            trackActionClick(action, value, 'action-' + action);
+            originalSubmitAction(action, value);
+        };
 
         socket.on('connect', () => { $('presence').textContent = 'connected'; });
         socket.on('disconnect', () => { $('presence').textContent = 'offline'; });

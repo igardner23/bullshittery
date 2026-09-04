@@ -1,0 +1,2 @@
+{"event_type": "click", "element_id": "test-button", "element_type": "button", "timestamp": 1788548438.7469287, "iso_time": "2026-09-04T19:00:38.746929+00:00", "session_id": "test_session_001", "user_alias": "TestUser", "context": {"test": true}, "page_state": {"phase": "test"}}
+{"event_type": "selection", "element_id": "roster-Nyx", "element_type": "roster_item", "timestamp": 1788548438.7469375, "iso_time": "2026-09-04T19:00:38.746938+00:00", "session_id": "test_session_001", "user_alias": "TestUser", "context": {"selected_user": "Nyx"}, "page_state": {}}

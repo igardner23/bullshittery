@@ -8,6 +8,7 @@ import threading
 from personalities import PERSONALITIES
 from persona_engine import PersonaEngine
 from telemetry import log_event
+from src.telemetry import log_ui_interaction, flush_telemetry
 from src.game_phase import phase_manager, GamePhase
 from src.narrative_director import narrative_director
 from src.round_telemetry import round_telemetry
@@ -202,6 +203,11 @@ def handle_join(data):
     session = phase_manager.create_session(username)
     player_sessions[request.sid] = session.session_id
     round_telemetry.start_session(session.session_id, username)
+    
+    # Initialize enhanced telemetry with session ID
+    from src.telemetry import reset_user_telemetry
+    reset_user_telemetry(username, session.session_id)
+    
     _update_narrative_context(session)
     emit('phase_update', phase_manager.get_phase_info(session.session_id))
     
@@ -215,6 +221,15 @@ def handle_join(data):
         'q3': profile.get('q3'),
         'q4': profile.get('q4')
     })
+    
+    # Log UI interaction for lobby join
+    log_ui_interaction(
+        event_type='form_submit',
+        element_id='enter-button',
+        element_type='button',
+        context={'username': username, 'profile_keys': list(profile.keys())},
+        page_state={'phase': 'lobby'}
+    )
     
     socketio.emit('player_update', _room_roster())
     emit('message', {'user': 'System', 'text': f'{username} entered the lobby.'}, broadcast=True)
@@ -314,6 +329,14 @@ def handle_message(msg):
     session_id = player_sessions.get(request.sid)
     if session_id:
         round_telemetry.record(session_id, 'chat_message', chat_length=len(text))
+        # Log UI interaction for chat message
+        log_ui_interaction(
+            event_type='message_send',
+            element_id='chat-form',
+            element_type='form',
+            context={'message_length': len(text), 'preview': text[:100]},
+            page_state={'phase': phase_manager.get_phase_info(session_id).get('phase', 'unknown') if phase_manager.get_session(session_id) else 'unknown'}
+        )
     session = phase_manager.record_participation(
         session_id,
         source='chat_message',
@@ -343,6 +366,17 @@ def handle_private_message(data):
     if not sender or not recipient_name or not text:
         emit('private_message_error', {'message': 'Choose a player and enter a message.'})
         return
+    
+    session_id = player_sessions.get(request.sid)
+    if session_id:
+        # Log UI interaction for private message
+        log_ui_interaction(
+            event_type='private_message_send',
+            element_id='private-form',
+            element_type='form',
+            context={'recipient': recipient_name, 'message_length': len(text)},
+            page_state={'phase': phase_manager.get_phase_info(session_id).get('phase', 'unknown') if phase_manager.get_session(session_id) else 'unknown'}
+        )
 
     recipient_sid = next(
         (
@@ -385,10 +419,43 @@ def handle_private_message(data):
         'text': text[:500],
     })
 
-def dynamic_player_manager():
-    print(f"\n[DYNAMIC] Starting dynamic player manager...")
+
+@socketio.on('ui_interaction')
+def handle_ui_interaction(data):
+    """Handle UI interaction events from the client for telemetry tracking."""
+    session_id = player_sessions.get(request.sid)
+    user_data = human_players.get(request.sid)
     
-    available_profiles = PERSONALITIES[20:]
+    if not session_id or not user_data:
+        return
+    
+    event_type = data.get('event_type', 'unknown')
+    element_id = data.get('element_id', 'unknown')
+    element_type = data.get('element_type', 'unknown')
+    context = data.get('context', {})
+    
+    # Get current phase state
+    session = phase_manager.get_session(session_id)
+    phase_info = phase_manager.get_phase_info(session_id) if session else {}
+    page_state = {
+        'phase': phase_info.get('phase', 'unknown'),
+        'match_round': getattr(session, 'match_round', 0) if session else 0,
+    }
+    
+    # Merge any additional page state from client
+    if 'page_state' in data:
+        page_state.update(data['page_state'])
+    
+    print(f"[UI_EVENT] {user_data['username']} -> {event_type} on {element_id} ({element_type})")
+    
+    log_ui_interaction(
+        event_type=event_type,
+        element_id=element_id,
+        element_type=element_type,
+        context=context,
+        page_state=page_state,
+    )
+
 # Game Phase Handlers
 
 @socketio.on('start_match')
@@ -453,6 +520,20 @@ def handle_game_action(data):
     username = human_players.get(user_sid, {}).get('username', 'Unknown')
     
     print(f"[GAME] {username} submitted action: {action}={value}")
+    
+    # Log UI interaction for game action
+    log_ui_interaction(
+        event_type='click',
+        element_id=f'action-{action}',
+        element_type='button',
+        context={'action': action, 'value': value, 'game_type': session.current_game.game_type},
+        page_state={
+            'phase': 'game',
+            'game_number': session.current_game.round_number,
+            'match_round': session.match_round
+        }
+    )
+    
     round_telemetry.record(session_id, 'game_action', action=f'{action}:{value}')
     
     game = active_games.get(session.current_game.game_id)
