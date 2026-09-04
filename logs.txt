@@ -7931,3 +7931,67 @@
   "method": "mock"
 }
 ------------------------------------------------------------
+{
+  "timestamp": "2026-09-04T18:41:30.103999",
+  "player": "Nyx",
+  "test_mode": true,
+  "parsed_message": "i was thinking the same thing",
+  "method": "mock"
+}
+------------------------------------------------------------
+{
+  "timestamp": "2026-09-04T18:41:34.204705",
+  "player": "Marcus_T",
+  "test_mode": true,
+  "parsed_message": "wait really?",
+  "method": "mock"
+}
+------------------------------------------------------------
+{
+  "timestamp": "2026-09-04T18:41:38.305272",
+  "player": "kai_77",
+  "test_mode": true,
+  "parsed_message": "bruh",
+  "method": "mock"
+}
+------------------------------------------------------------
+{
+  "timestamp": "2026-09-04T18:41:42.405815",
+  "player": "ElenaV",
+  "test_mode": true,
+  "parsed_message": "fr tho",
+  "method": "mock"
+}
+------------------------------------------------------------
+{
+  "timestamp": "2026-09-04T18:41:46.506464",
+  "player": "jordan_plays",
+  "test_mode": true,
+  "parsed_message": "fr tho",
+  "method": "mock"
+}
+------------------------------------------------------------
+{
+  "timestamp": "2026-09-04T18:41:50.607022",
+  "player": "Riley_M",
+  "test_mode": true,
+  "parsed_message": "lol true",
+  "method": "mock"
+}
+------------------------------------------------------------
+{
+  "timestamp": "2026-09-04T18:41:54.707570",
+  "player": "ace_spades",
+  "test_mode": true,
+  "parsed_message": "wait really?",
+  "method": "mock"
+}
+------------------------------------------------------------
+{
+  "timestamp": "2026-09-04T18:41:58.808111",
+  "player": "Sasha.K",
+  "test_mode": true,
+  "parsed_message": "wait really?",
+  "method": "mock"
+}
+------------------------------------------------------------
