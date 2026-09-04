@@ -1,411 +1,488 @@
-<!DOCTYPE html>
-<html lang="en" data-bs-theme="dark">
+<!doctype html>
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Lobby</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>4v1 | Shared lobby</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
     <style>
-        body { background: #0f1115; color: #e2e8f0; font-family: system-ui, sans-serif; height: 100vh; overflow: hidden; margin: 0; }
-        
-        #intro-screen { position: fixed; inset: 0; background: linear-gradient(135deg, #0f1115 0%, #1a1d24 100%); display: flex; align-items: center; justify-content: center; z-index: 100; transition: opacity 0.6s ease; }
-        #intro-screen.hidden { opacity: 0; pointer-events: none; }
-        .intro-card { background: #161920; padding: 3rem; border-radius: 16px; border: 1px solid #2d333b; width: 100%; max-width: 480px; text-align: center; box-shadow: 0 4px 40px rgba(0, 0, 0, 0.3); }
-        .intro-card h2 { color: #f1f5f9; font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; }
-        .intro-card .subtitle { color: #94a3b8; font-size: 0.95rem; margin-bottom: 2rem; line-height: 1.5; }
-        .intro-card input, .intro-card textarea { background: #1c2028; border: 1px solid #2d333b; color: #e2e8f0; padding: 0.75rem 1rem; font-size: 1rem; border-radius: 8px; width: 100%; resize: none; }
-        .intro-card button { background: #3b82f6; border: none; color: white; padding: 0.75rem; font-size: 1rem; font-weight: 500; border-radius: 8px; width: 100%; margin-top: 1rem; cursor: pointer; }
-        .intro-card button:hover { background: #2563eb; }
+        :root {
+            color-scheme: dark;
+            --ink: #f4f0e8;
+            --muted: #a9aaa4;
+            --dim: #747a75;
+            --canvas: #121513;
+            --panel: #1b201d;
+            --panel-soft: #202722;
+            --line: #39433c;
+            --mint: #a5e6bb;
+            --mint-dark: #1f6d4b;
+            --amber: #f4c56c;
+            --coral: #ee8e78;
+            --shadow: rgba(0, 0, 0, .28);
+        }
+
+        * { box-sizing: border-box; }
+        html, body { height: 100%; min-height: 100%; overflow: hidden; }
+        body {
+            margin: 0;
+            background:
+                linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px),
+                var(--canvas);
+            background-size: 32px 32px;
+            color: var(--ink);
+            font: 15px/1.5 "Space Grotesk", sans-serif;
+        }
+        button, input, textarea { font: inherit; }
+        button { border: 0; cursor: pointer; }
+        button:disabled { cursor: not-allowed; opacity: .45; }
+        .mono { font-family: "DM Mono", monospace; }
+        .muted { color: var(--muted); }
+        .eyebrow { color: var(--amber); font: 500 .72rem "DM Mono", monospace; letter-spacing: .08em; text-transform: uppercase; }
+        .hidden { display: none !important; }
+
+        .gate {
+            align-items: center;
+            background: rgba(10, 12, 11, .88);
+            display: grid;
+            inset: 0;
+            padding: 24px;
+            position: fixed;
+            overflow-y: auto;
+            z-index: 10;
+        }
+        .gate-panel {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            box-shadow: 0 24px 80px var(--shadow);
+            margin: auto;
+            max-width: 620px;
+            padding: clamp(24px, 5vw, 56px);
+            width: 100%;
+        }
+        .gate-panel h1 { font-size: clamp(3rem, 10vw, 6.5rem); letter-spacing: -.08em; line-height: .85; margin: 18px 0 12px; }
+        .gate-panel h2 { font-size: clamp(1.3rem, 3vw, 2rem); line-height: 1.1; margin: 0 0 18px; }
+        .gate-panel p { max-width: 52ch; }
+        .notice { border-left: 3px solid var(--amber); color: var(--muted); margin: 28px 0; padding: 2px 0 2px 16px; }
+        .notice strong { color: var(--ink); display: block; margin-bottom: 6px; }
+        .consent { align-items: flex-start; display: flex; gap: 12px; margin: 24px 0; }
+        .consent input { accent-color: var(--mint); margin-top: 5px; }
         .step { display: none; }
         .step.active { display: block; }
-        .loading-bar { height: 4px; background: #2d333b; border-radius: 2px; overflow: hidden; margin-top: 2rem; }
-        .loading-bar-fill { height: 100%; background: #3b82f6; width: 0%; transition: width 0.1s linear; }
 
-        .lobby-container { display: none; height: 100vh; }
-        .lobby-container.visible { display: flex; }
-        .sidebar { width: 260px; background: #161920; border-right: 1px solid #2d333b; display: flex; flex-direction: column; padding: 1.5rem; }
-        .sidebar h5 { color: #f1f5f9; font-weight: 600; }
-        .player-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem; }
-        .player-item { background: #1c2028; border: 1px solid #2d333b; border-radius: 6px; padding: 0.6rem 0.8rem; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; color: #e2e8f0; }
-        .player-item .dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; }
-        
-        .chat-area { flex: 1; display: flex; flex-direction: column; }
-        .chat-header { padding: 1rem 1.5rem; border-bottom: 1px solid #2d333b; background: #161920; }
-        .chat-header h5 { color: #f1f5f9; font-weight: 600; }
-        .chat-box { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; background: #0f1115; }
-        .chat-input-area { padding: 1rem 1.5rem; border-top: 1px solid #2d333b; background: #161920; }
-        
-        .msg { max-width: 70%; padding: 0.6rem 1rem; border-radius: 12px; background: #1c2028; border: 1px solid #2d333b; color: #e2e8f0; }
-        .msg-user { align-self: flex-end; background: #2563eb; border-color: #3b82f6; color: white; }
-        .msg-other { align-self: flex-start; }
-        .msg-system { align-self: center; font-size: 0.85rem; color: #64748b; font-style: italic; background: transparent; border: none; padding: 0.3rem; }
-        .msg-sender { font-size: 0.7rem; color: #94a3b8; margin-bottom: 2px; }
+        .button-primary, .button-quiet, .action-button {
+            border: 1px solid transparent;
+            min-height: 44px;
+            padding: 10px 16px;
+            transition: background .18s ease, border-color .18s ease, transform .18s ease;
+        }
+        .button-primary { background: var(--mint); color: #102219; font-weight: 700; }
+        .button-primary:hover, .action-button:hover { transform: translateY(-2px); }
+        .button-quiet { background: transparent; border-color: var(--line); color: var(--ink); }
+        .field { background: #151a17; border: 1px solid var(--line); border-radius: 0; color: var(--ink); margin: 8px 0; padding: 12px 14px; width: 100%; }
+        .field:focus { border-color: var(--mint); outline: 2px solid rgba(165,230,187,.18); }
 
-        .typing-indicator { padding: 0 1.5rem 0.5rem; font-size: 0.8rem; color: #94a3b8; font-style: italic; min-height: 1.2rem; }
+        .app-shell { display: grid; grid-template-columns: minmax(320px, 38%) 1fr; height: 100dvh; min-height: 0; overflow: hidden; }
+        .chat-pane { background: rgba(18,21,19,.9); border-right: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; }
+        .pane-header { border-bottom: 1px solid var(--line); padding: 22px 24px; }
+        .brand-row { align-items: center; display: flex; justify-content: space-between; }
+        .brand { font-size: 1.15rem; font-weight: 700; letter-spacing: -.04em; }
+        .presence { color: var(--mint); font: 500 .72rem "DM Mono", monospace; }
+        .presence::before { background: var(--mint); border-radius: 50%; content: ""; display: inline-block; height: 7px; margin-right: 7px; width: 7px; }
+        .chat-subtitle { color: var(--muted); font-size: .86rem; margin: 7px 0 0; }
+        .roster { border-bottom: 1px solid var(--line); padding: 14px 24px; }
+        .roster-heading { align-items: center; display: flex; justify-content: space-between; }
+        .roster-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; max-height: 76px; overflow-y: auto; }
+        .roster-person { background: transparent; border: 1px solid var(--line); color: var(--muted); font: .7rem "DM Mono", monospace; padding: 5px 8px; }
+        .roster-person { cursor: pointer; }
+        .roster-person:hover, .roster-person.selected { border-color: var(--mint-dark); color: var(--mint); }
+        .roster-person.selected { background: var(--mint); color: #102219; }
+        .private-form { border-top: 1px solid var(--line); display: flex; gap: 8px; padding: 10px 24px; }
+        .private-form .field { margin: 0; min-width: 0; }
+        .private-form select { flex: 0 0 34%; }
+        .private-send { background: transparent; border: 1px solid var(--line); color: var(--muted); padding: 0 10px; }
+        .chat-list { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 20px 24px; }
+        .message { animation: appear .28s ease both; border-left: 2px solid var(--line); margin: 0 0 18px; padding: 0 0 0 12px; }
+        .message.human { border-color: var(--mint); margin-left: 12%; }
+        .message.system { border-color: var(--amber); }
+        .message-sender { color: var(--muted); display: block; font: 500 .72rem "DM Mono", monospace; margin-bottom: 3px; }
+        .message-body { color: var(--ink); overflow-wrap: anywhere; }
+        .typing { animation: pulse 1.4s ease-in-out infinite; color: var(--dim); font: .78rem "DM Mono", monospace; margin: 0 0 16px 14px; }
+        .chat-form { border-top: 1px solid var(--line); display: flex; gap: 8px; padding: 16px 24px 22px; }
+        .chat-form .field { margin: 0; }
+        .send-button { background: var(--mint); color: #102219; font-weight: 700; padding: 0 17px; }
 
-        .table-container { display: none; height: 100vh; flex-direction: column; }
-        .table-container.visible { display: flex; }
-        .table-header { padding: 1rem 1.5rem; border-bottom: 1px solid #2d333b; background: #161920; display: flex; justify-content: space-between; align-items: center; }
-        .table-main { flex: 1; display: flex; overflow: hidden; }
-        .teammates-panel { width: 220px; background: #161920; border-right: 1px solid #2d333b; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
-        .teammate-card { background: #1c2028; border: 1px solid #2d333b; border-radius: 8px; padding: 1rem; text-align: center; }
-        .teammate-card.ai-opponent { border-color: #ef4444; }
-        .gameplay-area { flex: 1; background: #0f1115; display: flex; align-items: center; justify-content: center; }
-        .table-chat-area { height: 250px; border-top: 1px solid #2d333b; background: #161920; display: flex; flex-direction: column; }
-        .table-chat-box { flex: 1; overflow-y: auto; padding: 1rem 1.5rem; display: flex; flex-direction: column; gap: 0.75rem; }
-        .table-chat-input { padding: 1rem 1.5rem; border-top: 1px solid #2d333b; display: flex; gap: 0.5rem; }
+        .play-pane { min-width: 0; min-height: 0; overflow-y: auto; padding: 30px clamp(22px, 5vw, 72px); }
+        .play-header { align-items: flex-start; border-bottom: 1px solid var(--line); display: flex; gap: 24px; justify-content: space-between; padding-bottom: 22px; }
+        .play-header h2 { font-size: clamp(1.7rem, 4vw, 3rem); letter-spacing: -.06em; line-height: 1; margin: 8px 0 0; }
+        .round-marker { color: var(--amber); font: 500 .78rem "DM Mono", monospace; text-align: right; }
+        .progress { background: #2d352f; height: 4px; margin-top: 12px; overflow: hidden; width: 180px; }
+        .progress-fill { background: var(--mint); height: 100%; transition: width .35s ease; width: 0; }
+        .play-content { margin: 0 auto; max-width: 940px; padding: 48px 0; }
+        .play-content h1 { font-size: clamp(2rem, 5vw, 4.5rem); letter-spacing: -.08em; line-height: .95; margin: 0 0 18px; max-width: 11ch; }
+        .play-content > p { color: var(--muted); max-width: 48ch; }
+        .team-strip { display: flex; flex-wrap: wrap; gap: 10px; margin: 30px 0; }
+        .person { background: var(--panel); border: 1px solid var(--line); padding: 12px 15px; }
+        .person.current { border-color: var(--mint-dark); }
+        .person small { color: var(--dim); display: block; font: .68rem "DM Mono", monospace; margin-top: 3px; }
+        .intermission-note { border-left: 3px solid var(--amber); color: var(--muted); margin-top: 34px; padding-left: 16px; }
+        .intermission-note strong { color: var(--ink); display: block; }
+
+        .game-board { border-top: 1px solid var(--line); margin-top: 42px; padding-top: 28px; }
+        .game-board h3 { font-size: 1.35rem; margin: 0 0 8px; }
+        .game-board p { color: var(--muted); margin-top: 0; }
+        .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 22px; }
+        .action-button { background: var(--panel-soft); border-color: var(--line); color: var(--ink); }
+        .action-button.accent { background: var(--mint); color: #102219; font-weight: 700; }
+        .guess-row { display: flex; gap: 8px; max-width: 520px; }
+        .guess-row .field { margin: 0; }
+        .game-status { color: var(--amber); font: .75rem "DM Mono", monospace; margin-top: 18px; min-height: 1.2em; }
+        .result-box { border: 1px solid var(--line); margin-top: 32px; padding: 24px; }
+        .result-box h3 { margin-top: 0; }
+        .result-list { color: var(--muted); display: grid; gap: 12px; }
+        .result-list strong { color: var(--ink); }
+
+        @keyframes appear { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+        @media (max-width: 760px) {
+            .app-shell { display: grid; grid-template-columns: 1fr; grid-template-rows: minmax(0, 52dvh) minmax(0, 48dvh); }
+            .chat-pane { min-height: 0; }
+            .play-pane { min-height: 0; padding: 22px 18px; }
+            .play-content { padding: 32px 0; }
+            .play-content h1 { font-size: clamp(2.4rem, 13vw, 4rem); }
+            .chat-list { padding: 18px; }
+            .chat-form, .pane-header { padding-left: 18px; padding-right: 18px; }
+            .roster, .private-form { padding-left: 18px; padding-right: 18px; }
+            .play-header { gap: 12px; }
+            .progress { width: 130px; }
+            .guess-row { flex-direction: column; }
+        }
     </style>
 </head>
 <body>
-    <div id="intro-screen">
-        <div class="intro-card">
-            <div class="step active" id="step-1">
-                <div style="font-size: 3rem; margin-bottom: 1.5rem;">👋</div>
-                <h2>Welcome to the Lobby</h2>
-                <p class="subtitle">Before we match you, let's get to know you a bit.</p>
-                <input type="text" id="username-input" placeholder="What should we call you?" maxlength="20" required autofocus>
-                <button onclick="nextStep(2)">Continue</button>
+    <div id="consent-gate" class="gate">
+        <section class="gate-panel">
+            <div id="consent-step" class="step active">
+                <div class="eyebrow">A shared social game</div>
+                <h1>4v1</h1>
+                <h2>Enter the room. See who stays.</h2>
+                <div class="notice">
+                    <strong>Before you enter</strong>
+                    <span>This experience includes automated characters, a staged reveal, and game telemetry. You can leave at any time. Do not share anything you would not want used as game input.</span>
+                </div>
+                <label class="consent"><input id="consent-checkbox" type="checkbox"><span>I understand and consent to participate under these conditions.</span></label>
+                <button id="consent-button" class="button-primary" disabled>Continue</button>
             </div>
-            <div class="step" id="step-2">
-                <h2>What's your earliest gaming memory?</h2>
-                <textarea id="q1" rows="3" placeholder="I remember playing..."></textarea>
-                <button onclick="nextStep(3)">Continue</button>
+            <div id="profile-step" class="step">
+                <div class="eyebrow">A little calibration</div>
+                <h2>Tell the room how you play.</h2>
+                <p class="muted">These answers help shape the conversation. Keep them as general as you like.</p>
+                <input id="username-input" class="field" maxlength="20" placeholder="Display name" autocomplete="nickname">
+                <textarea id="q1" class="field" rows="2" placeholder="Your earliest gaming memory"></textarea>
+                <textarea id="q2" class="field" rows="2" placeholder="Your ideal teammate"></textarea>
+                <textarea id="q3" class="field" rows="2" placeholder="When things go wrong, I..."></textarea>
+                <textarea id="q4" class="field" rows="2" placeholder="Something interesting about you"></textarea>
+                <button id="enter-button" class="button-primary">Enter the lobby</button>
             </div>
-            <div class="step" id="step-3">
-                <h2>Describe your ideal teammate</h2>
-                <textarea id="q2" rows="3" placeholder="They're the kind of person who..."></textarea>
-                <button onclick="nextStep(4)">Continue</button>
-            </div>
-            <div class="step" id="step-4">
-                <h2>What's your go-to strategy when things go wrong?</h2>
-                <textarea id="q3" rows="3" placeholder="When everything falls apart, I..."></textarea>
-                <button onclick="nextStep(5)">Continue</button>
-            </div>
-            <div class="step" id="step-5">
-                <h2>Tell us something most people don't know about you</h2>
-                <textarea id="q4" rows="3" placeholder="Something interesting..."></textarea>
-                <button onclick="nextStep(6)">Find My Match</button>
-            </div>
-            <div class="step" id="step-6">
-                <div style="font-size: 3rem; margin-bottom: 1.5rem;">⚙️</div>
-                <h2>Calibrating Match...</h2>
-                <p class="subtitle" id="loading-text">Analyzing community trends...</p>
-                <div class="loading-bar"><div class="loading-bar-fill" id="loading-fill"></div></div>
-            </div>
-        </div>
+        </section>
     </div>
 
-    <div class="lobby-container" id="lobby-container">
-        <aside class="sidebar">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="m-0">Players</h5>
-                <span class="badge bg-secondary" id="player-count">0/40</span>
-            </div>
-            <div class="player-list" id="player-list"></div>
-        </aside>
-        <main class="chat-area">
-            <div class="chat-header d-flex justify-content-between align-items-center">
-                <h5 class="m-0">Community Chat</h5>
-                <span class="badge bg-primary" id="status-badge">Waiting</span>
-            </div>
-            <div class="chat-box" id="chat-box"></div>
-            <div class="typing-indicator" id="typing-indicator"></div>
-            <div class="chat-input-area">
-                <form id="chat-form" class="d-flex gap-2">
-                    <input type="text" id="msg-input" class="form-control bg-dark text-white border-secondary" placeholder="Say hello..." autocomplete="off">
-                    <button type="submit" class="btn btn-primary px-4">Send</button>
-                </form>
-            </div>
-        </main>
-    </div>
-
-    <div class="table-container" id="table-container">
-        <div class="table-header">
-            <h5 class="m-0 text-white">Match in Progress</h5>
-            <span class="badge bg-success">Live</span>
-        </div>
-        <div class="table-main">
-            <aside class="teammates-panel">
-                <h6 class="text-secondary text-uppercase" style="font-size: 0.75rem;">Your Team</h6>
-                <div class="teammate-card">
-                    <div class="fw-bold text-white" id="table-my-name">You</div>
-                    <div class="small text-success">● Ready</div>
-                </div>
-                <div class="teammate-card">
-                    <div class="fw-bold text-white">Nyx</div>
-                    <div class="small text-success">● Ready</div>
-                </div>
-                <div class="teammate-card">
-                    <div class="fw-bold text-white">Marcus_T</div>
-                    <div class="small text-success">● Ready</div>
-                </div>
-                <div class="teammate-card">
-                    <div class="fw-bold text-white">Sasha.K</div>
-                    <div class="small text-success">● Ready</div>
-                </div>
-                <h6 class="text-secondary text-uppercase mt-4" style="font-size: 0.75rem;">Opponent</h6>
-                <div class="teammate-card ai-opponent">
-                    <div class="fw-bold text-danger">The Architect</div>
-                    <div class="small text-danger">● Active</div>
-                </div>
-            </aside>
-            <div class="gameplay-area">
-                <div style="text-align: center; color: #64748b;">
-                    <h3>Gameplay Area</h3>
-                    <p>Waiting for the next phase...</p>
-                </div>
-            </div>
-        </div>
-        <div class="table-chat-area">
-            <div class="table-chat-box" id="table-chat-box"></div>
-            <form id="table-chat-form" class="table-chat-input">
-                <input type="text" id="table-msg-input" class="form-control bg-dark text-white border-secondary" placeholder="Talk to your team..." autocomplete="off">
-                <button type="submit" class="btn btn-primary px-4">Send</button>
+    <main id="app-shell" class="app-shell hidden">
+        <section class="chat-pane" aria-label="Shared chat">
+            <header class="pane-header">
+                <div class="brand-row"><span class="brand">the waiting room</span><span id="presence" class="presence">connecting</span></div>
+                <p class="chat-subtitle">The conversation continues between games.</p>
+            </header>
+            <section class="roster" aria-label="Active users">
+                <div class="roster-heading"><span class="eyebrow">In the room</span><span id="roster-count" class="muted mono">0</span></div>
+                <div id="roster-list" class="roster-list"></div>
+            </section>
+            <div id="chat-list" class="chat-list" aria-live="polite"></div>
+            <div id="typing-line" class="typing hidden"></div>
+            <form id="chat-form" class="chat-form">
+                <input id="chat-input" class="field" aria-label="Chat message" placeholder="Say something to the room" autocomplete="off">
+                <button class="send-button" aria-label="Send message">Send</button>
             </form>
-        </div>
-    </div>
+            <form id="private-form" class="private-form">
+                <select id="private-recipient" class="field" aria-label="Private message recipient"><option value="">Private message...</option></select>
+                <input id="private-input" class="field" aria-label="Private message" placeholder="Write quietly" autocomplete="off">
+                <button class="private-send" aria-label="Send private message">Send</button>
+            </form>
+        </section>
+
+        <section class="play-pane" aria-live="polite">
+            <header class="play-header">
+                <div><div class="eyebrow">Current scene</div><h2 id="phase-label">Lobby</h2></div>
+                <div><div id="round-marker" class="round-marker">LOBBY 01 / 03</div><div class="progress" role="progressbar" aria-label="Lobby participation"><div id="progress-fill" class="progress-fill"></div></div></div>
+            </header>
+            <div id="play-content" class="play-content"></div>
+        </section>
+    </main>
 
     <script>
-        // GLOBAL STATE - initialized at module level
-        let socket = null;
-        let myUsername = '';
-        let userProfile = { q1: '', q2: '', q3: '', q4: '' };
-        let matchTimer = null;
-        let typingUsers = new Set();
-        let isInLobby = false;
-        let isInTable = false;
+        const socket = io();
+        const state = { username: '', phase: 'lobby', gameType: '', matchRound: 1, gameNumber: 0, team: [], opponent: '', actionLocked: false };
+        const typingUsers = new Map();
+        const $ = (id) => document.getElementById(id);
 
-        // DOM ELEMENTS - cached at load
-        const elements = {
-            introScreen: document.getElementById('intro-screen'),
-            lobbyContainer: document.getElementById('lobby-container'),
-            tableContainer: document.getElementById('table-container'),
-            chatBox: document.getElementById('chat-box'),
-            tableChatBox: document.getElementById('table-chat-box'),
-            chatForm: document.getElementById('chat-form'),
-            tableChatForm: document.getElementById('table-chat-form'),
-            msgInput: document.getElementById('msg-input'),
-            tableMsgInput: document.getElementById('table-msg-input'),
-            playerList: document.getElementById('player-list'),
-            playerCount: document.getElementById('player-count'),
-            typingIndicator: document.getElementById('typing-indicator'),
-            statusBadge: document.getElementById('status-badge'),
-            loadingFill: document.getElementById('loading-fill'),
-            loadingText: document.getElementById('loading-text'),
-            tableMyName: document.getElementById('table-my-name')
-        };
-
-        // SOCKET INITIALIZATION - happens once at page load
-        function initializeSocket() {
-            console.log('[SOCKET] Initializing socket connection...');
-            socket = io();
-            
-            socket.on('connect', () => {
-                console.log('[SOCKET] Connected successfully');
-            });
-
-            socket.on('disconnect', () => {
-                console.log('[SOCKET] Disconnected');
-            });
-
-            socket.on('connect_error', (error) => {
-                console.error('[SOCKET] Connection error:', error);
-            });
-
-            socket.on('player_update', handlePlayerUpdate);
-            socket.on('message', handleSystemMessage);
-            socket.on('chat_message', handleChatMessage);
-            socket.on('typing_start', handleTypingStart);
-            socket.on('typing_stop', handleTypingStop);
-            socket.on('transition_to_table', handleTableTransition);
-            socket.on('error', handleError);
-
-            console.log('[SOCKET] All event listeners attached');
+        function appendMessage(text, sender = 'System', kind = 'system') {
+            if (!text) return;
+            const item = document.createElement('article');
+            item.className = `message ${kind}`;
+            const label = document.createElement('span');
+            label.className = 'message-sender';
+            label.textContent = sender;
+            const body = document.createElement('span');
+            body.className = 'message-body';
+            body.textContent = text;
+            item.append(label, body);
+            $('chat-list').appendChild(item);
+            $('chat-list').scrollTop = $('chat-list').scrollHeight;
         }
 
-        // EVENT HANDLERS
-        function handlePlayerUpdate(data) {
-            console.log('[EVENT] player_update:', data);
-            if (!isInLobby) return;
-            
-            elements.playerCount.textContent = `${data.count}/40`;
-            elements.playerList.innerHTML = data.players.map(p => 
-                `<div class="player-item"><span>${p}</span><span class="dot"></span></div>`
-            ).join('');
-            
-            if (data.count >= 30) {
-                elements.statusBadge.textContent = 'Lobby Full';
-                elements.statusBadge.className = 'badge bg-success';
-            }
+        function setTyping(user, active, style = '') {
+            if (active) typingUsers.set(user, style);
+            else typingUsers.delete(user);
+            const names = [...typingUsers.keys()];
+            $('typing-line').textContent = names.length ? `${names.join(', ')} ${names.length === 1 ? 'is' : 'are'} typing...` : '';
+            $('typing-line').classList.toggle('hidden', names.length === 0);
         }
 
-        function handleSystemMessage(data) {
-            console.log('[EVENT] message:', data);
-            if (!isInLobby) return;
-            renderMessage(elements.chatBox, 'System', data.text, 'system');
-        }
-
-        function handleChatMessage(data) {
-            console.log('[EVENT] chat_message:', data);
-            if (!isInLobby && !isInTable) return;
-            
-            const targetBox = isInTable ? elements.tableChatBox : elements.chatBox;
-            const type = (data.user === myUsername) ? 'user' : 'other';
-            renderMessage(targetBox, data.user, data.text, type);
-        }
-
-        function handleTypingStart(data) {
-            console.log('[EVENT] typing_start:', data);
-            if (!isInLobby) return;
-            typingUsers.add(data.user);
-            updateTypingIndicator();
-        }
-
-        function handleTypingStop(data) {
-            console.log('[EVENT] typing_stop:', data);
-            if (!isInLobby) return;
-            typingUsers.delete(data.user);
-            updateTypingIndicator();
-        }
-
-        function handleTableTransition(data) {
-            console.log('[EVENT] transition_to_table:', data);
-            if (matchTimer) clearTimeout(matchTimer);
-            showTableScreen(data.teammates);
-        }
-
-        function handleError(data) {
-            console.error('[EVENT] error:', data);
-            alert(data.text);
-            window.location.reload();
-        }
-
-        // RENDERING
-        function renderMessage(box, user, text, type) {
-            console.log('[RENDER] Rendering message:', { box: box.id, user, type, text });
-            
-            const div = document.createElement('div');
-            div.className = `msg msg-${type}`;
-            
-            if (type === 'system') {
-                div.textContent = text;
-            } else {
-                const sender = document.createElement('div');
-                sender.className = 'msg-sender';
-                sender.textContent = user;
-                
-                const bubble = document.createElement('div');
-                bubble.textContent = text;
-                
-                div.appendChild(sender);
-                div.appendChild(bubble);
-            }
-            
-            box.appendChild(div);
-            box.scrollTop = box.scrollHeight;
-            console.log('[RENDER] Message appended. Total children:', box.children.length);
-        }
-
-        function updateTypingIndicator() {
-            if (typingUsers.size === 0) {
-                elements.typingIndicator.innerHTML = '';
-            } else {
-                const users = Array.from(typingUsers);
-                let text = users.length === 1 ? `${users[0]} is typing` :
-                           users.length === 2 ? `${users[0]} and ${users[1]} are typing` :
-                           `${users.length} people are typing`;
-                elements.typingIndicator.textContent = text + '...';
-            }
-        }
-
-        // FLOW CONTROL
-        function nextStep(step) {
-            if (step === 2) {
-                const name = document.getElementById('username-input').value.trim();
-                if (!name) return;
-                myUsername = name;
-            } else if (step >= 3 && step <= 5) {
-                const qNum = step - 2;
-                const answer = document.getElementById(`q${qNum}`).value.trim();
-                if (!answer) return;
-                userProfile[`q${qNum}`] = answer;
-            }
-            
-            document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
-            document.getElementById(`step-${step}`).classList.add('active');
-
-            if (step === 6) {
-                startLoadingSequence();
-            }
-        }
-
-        function startLoadingSequence() {
-            const messages = ["Connecting to regional servers...", "Scanning active lobbies...", "Finding players with similar vibes...", "Finalizing your spot..."];
-            let progress = 0, msgIndex = 0;
-            
-            const interval = setInterval(() => {
-                progress += 2;
-                elements.loadingFill.style.width = `${progress}%`;
-                if (progress % 25 === 0 && msgIndex < messages.length) {
-                    elements.loadingText.textContent = messages[msgIndex];
-                    msgIndex++;
+        function updateRoster(users) {
+            const list = $('roster-list');
+            const recipient = $('private-recipient');
+            list.replaceChildren();
+            recipient.replaceChildren(new Option('Private message...', ''));
+            users.forEach((user) => {
+                const name = user.name;
+                const isSelectable = name !== state.username;
+                const person = document.createElement('button');
+                person.type = 'button';
+                person.className = 'roster-person';
+                person.textContent = name;
+                if (isSelectable) {
+                    person.addEventListener('click', () => {
+                        recipient.value = name;
+                        document.querySelectorAll('.roster-person').forEach((item) => item.classList.remove('selected'));
+                        person.classList.add('selected');
+                        $('private-input').focus();
+                    });
+                    recipient.appendChild(new Option(name, name));
+                } else {
+                    person.disabled = true;
                 }
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    enterLobby();
-                }
-            }, 60);
+                list.appendChild(person);
+            });
+            $('roster-count').textContent = String(users.length);
         }
 
-        function enterLobby() {
-            console.log('[FLOW] Entering lobby');
-            isInLobby = true;
-            elements.introScreen.classList.add('hidden');
-            elements.lobbyContainer.classList.add('visible');
-            
-            console.log('[FLOW] Emitting join_lobby');
-            socket.emit('join_lobby', { username: myUsername, profile: userProfile });
-            
-            matchTimer = setTimeout(() => {
-                console.log('[FLOW] 2 minutes elapsed, requesting table transition');
-                socket.emit('request_table_transition', { username: myUsername });
-            }, 120000);
+        function renderTeam(team) {
+            const strip = document.createElement('div');
+            strip.className = 'team-strip';
+            team.forEach((name) => {
+                const person = document.createElement('div');
+                person.className = 'person';
+                person.textContent = name;
+                const role = document.createElement('small');
+                role.textContent = name === state.username ? 'you' : 'teammate';
+                person.appendChild(role);
+                strip.appendChild(person);
+            });
+            return strip;
         }
 
-        function showTableScreen(teammates) {
-            console.log('[FLOW] Showing table screen');
-            isInLobby = false;
-            isInTable = true;
-            elements.lobbyContainer.classList.remove('visible');
-            elements.tableContainer.classList.add('visible');
-            elements.tableMyName.textContent = myUsername;
+        function actionButton(label, action, value, accent = false) {
+            const button = document.createElement('button');
+            button.className = `action-button${accent ? ' accent' : ''}`;
+            button.textContent = label;
+            button.addEventListener('click', () => submitAction(action, value));
+            return button;
         }
 
-        // FORM HANDLERS
-        elements.chatForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const text = elements.msgInput.value.trim();
-            if (text && socket) {
-                renderMessage(elements.chatBox, myUsername, text, 'user');
-                socket.emit('chat_message', { text });
-                elements.msgInput.value = '';
+        function submitAction(action, value) {
+            if (state.actionLocked) return;
+            state.actionLocked = true;
+            document.querySelectorAll('.action-button, .guess-row button').forEach((button) => { button.disabled = true; });
+            $('game-status').textContent = 'Waiting for the room...';
+            socket.emit('submit_game_action', { action, value });
+        }
+
+        function renderLobby(data) {
+            const intermission = Boolean(data.objective && data.objective.intermission);
+            const content = $('play-content');
+            content.replaceChildren();
+            const eyebrow = document.createElement('div');
+            eyebrow.className = 'eyebrow';
+            eyebrow.textContent = intermission ? 'Between rounds' : 'The room is open';
+            const heading = document.createElement('h1');
+            heading.textContent = intermission ? 'They came back.' : 'Find your people.';
+            const copy = document.createElement('p');
+            copy.textContent = intermission
+                ? 'The games are over for now. Talk with the room, notice who returns, and see who is suddenly somewhere else.'
+                : 'There is no rush. The room will take shape around whoever decides to speak.';
+            content.append(eyebrow, heading, copy);
+            if (state.team.length) content.append(renderTeam(state.team));
+            const note = document.createElement('div');
+            note.className = 'intermission-note';
+            const strong = document.createElement('strong');
+            strong.textContent = intermission ? `Match round ${state.matchRound} is waiting.` : 'Participation opens the first match.';
+            note.appendChild(strong);
+            note.appendChild(document.createTextNode(' Chat remains open while the room decides what happens next.'));
+            content.appendChild(note);
+        }
+
+        function renderGame(data) {
+            const content = $('play-content');
+            content.replaceChildren();
+            const eyebrow = document.createElement('div');
+            eyebrow.className = 'eyebrow';
+            eyebrow.textContent = `Match round ${state.matchRound} · game ${state.gameNumber}`;
+            const heading = document.createElement('h1');
+            heading.textContent = data.game_type === 'voting' ? 'Make the call.' : data.game_type === 'turn_based' ? 'Choose your nerve.' : 'Share what you know.';
+            content.append(eyebrow, heading, renderTeam(state.team));
+            const board = document.createElement('div');
+            board.className = 'game-board';
+            const title = document.createElement('h3');
+            const description = document.createElement('p');
+            const actions = document.createElement('div');
+            actions.className = 'actions';
+            if (data.game_type === 'voting') {
+                title.textContent = data.prompt || 'Should the team invest heavily in this opportunity?';
+                description.textContent = 'The room has to move together. You do not have to agree for the same reason.';
+                actions.append(actionButton('Vote yes', 'vote', 'yes', true), actionButton('Vote no', 'vote', 'no'), actionButton('Abstain', 'vote', 'abstain'));
+            } else if (data.game_type === 'turn_based') {
+                title.textContent = data.prompt || 'Do we play it safe or take the risk?';
+                description.textContent = 'A safe move builds slowly. A risky move changes how the team sees you.';
+                actions.append(actionButton('Play it safe', 'turn_action', 'safe'), actionButton('Take the risk', 'turn_action', 'risk', true));
+            } else {
+                title.textContent = data.prompt || 'What is the room trying to describe?';
+                description.textContent = 'Your teammates have clues. Your guess becomes part of the group memory.';
+                const row = document.createElement('div');
+                row.className = 'guess-row';
+                const input = document.createElement('input');
+                input.className = 'field';
+                input.placeholder = 'Your guess';
+                input.id = 'guess-input';
+                const button = actionButton('Submit guess', 'guess', '');
+                button.addEventListener('click', () => submitAction('guess', input.value.trim()));
+                row.append(input, button);
+                actions.appendChild(row);
             }
+            const status = document.createElement('div');
+            status.className = 'game-status';
+            status.id = 'game-status';
+            board.append(title, description, actions, status);
+            content.appendChild(board);
+        }
+
+        function renderResults(data) {
+            const content = $('play-content');
+            content.replaceChildren();
+            const eyebrow = document.createElement('div');
+            eyebrow.className = 'eyebrow';
+            eyebrow.textContent = 'The room has finished speaking';
+            const heading = document.createElement('h1');
+            heading.textContent = 'You were looking at the wrong score.';
+            const copy = document.createElement('p');
+            copy.textContent = 'There is no honest performance card waiting here. What happened between the games, the returning faces, and the things they wanted from you is the part worth examining.';
+            const box = document.createElement('div');
+            box.className = 'result-box';
+            const boxHeading = document.createElement('h3');
+            boxHeading.textContent = 'The next question is yours.';
+            const list = document.createElement('div');
+            list.className = 'result-list';
+            ['Who did you trust?', 'Which disagreements felt spontaneous?', 'What changed when the room stopped being a game?'].forEach((text) => {
+                const line = document.createElement('div');
+                line.innerHTML = `<strong>Ask yourself:</strong> ${text}`;
+                list.appendChild(line);
+            });
+            box.append(boxHeading, list);
+            content.append(eyebrow, heading, copy, box);
+        }
+
+        function updateParticipation(data) {
+            const points = Number(data.participation) || 0;
+            const target = Number(data.participation_target) || 3;
+            const percent = Math.min(100, Math.round((points / target) * 100));
+            $('progress-fill').style.width = `${percent}%`;
+            $('round-marker').textContent = state.phase === 'lobby' ? `LOBBY ${String(state.matchRound).padStart(2, '0')} / 03 · ${points}/${target}` : `ROUND ${state.matchRound} · GAME ${state.gameNumber}`;
+        }
+
+        function updatePhase(data) {
+            state.phase = data.phase || 'lobby';
+            state.gameType = data.game_type || '';
+            state.matchRound = Number(data.match_round) || state.matchRound;
+            state.gameNumber = Number(data.game_number || data.round_number) || 0;
+            state.team = data.team_players || state.team;
+            state.opponent = data.opponent_id || state.opponent;
+            state.actionLocked = false;
+            $('phase-label').textContent = state.phase === 'results' ? 'Reflection' : state.phase === 'lobby' ? 'Lobby' : `Game ${state.gameNumber}`;
+            updateParticipation(data);
+            if (state.phase === 'results') renderResults(data);
+            else if (state.phase === 'lobby') renderLobby(data);
+            else renderGame(data);
+        }
+
+        $('consent-checkbox').addEventListener('change', () => { $('consent-button').disabled = !$('consent-checkbox').checked; });
+        $('consent-button').addEventListener('click', () => { $('consent-step').classList.remove('active'); $('profile-step').classList.add('active'); $('username-input').focus(); });
+        $('enter-button').addEventListener('click', () => {
+            state.username = $('username-input').value.trim() || `Anon_${Math.floor(100 + Math.random() * 900)}`;
+            const profile = { q1: $('q1').value, q2: $('q2').value, q3: $('q3').value, q4: $('q4').value };
+            socket.emit('join_lobby', { username: state.username, profile, consent_given: true });
+            $('consent-gate').classList.add('hidden');
+            $('app-shell').classList.remove('hidden');
+        });
+        $('chat-form').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const input = $('chat-input');
+            const text = input.value.trim();
+            if (!text) return;
+            socket.emit('chat_message', { text });
+            appendMessage(text, state.username || 'You', 'human');
+            input.value = '';
+        });
+        $('private-form').addEventListener('submit', (event) => {
+            event.preventDefault();
+            const recipient = $('private-recipient').value;
+            const input = $('private-input');
+            const text = input.value.trim();
+            if (!recipient || !text) return;
+            socket.emit('private_message', { recipient, text });
+            appendMessage(`to ${recipient}: ${text}`, 'private · you', 'human');
+            input.value = '';
         });
 
-        elements.tableChatForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            const text = elements.tableMsgInput.value.trim();
-            if (text && socket) {
-                renderMessage(elements.tableChatBox, myUsername, text, 'user');
-                socket.emit('chat_message', { text, context: 'table' });
-                elements.tableMsgInput.value = '';
-            }
+        socket.on('connect', () => { $('presence').textContent = 'connected'; });
+        socket.on('disconnect', () => { $('presence').textContent = 'offline'; });
+        socket.on('chat_message', (data) => appendMessage(data.text || data.message, data.user || 'Player', 'ai'));
+        socket.on('message', (data) => appendMessage(data.text || data.message, data.user || 'System', 'system'));
+        socket.on('typing_start', (data) => setTyping(data.user, true, data.style));
+        socket.on('typing_stop', (data) => setTyping(data.user, false));
+        socket.on('phase_update', updatePhase);
+        socket.on('participation_update', updateParticipation);
+        socket.on('player_update', (data) => {
+            const users = data.users || (data.players || []).map((name) => ({ name, kind: 'persona' }));
+            $('presence').textContent = `${data.count || users.length} in room`;
+            updateRoster(users);
         });
-
-        // INITIALIZATION
-        initializeSocket();
-        console.log('[INIT] Page loaded, socket initialized');
+        socket.on('private_message', (data) => {
+            const label = data.sender === state.username ? `private · to ${data.recipient}` : `private · ${data.sender}`;
+            appendMessage(data.text, label, 'system');
+        });
+        socket.on('private_message_error', (data) => appendMessage(data.message, 'private message', 'system'));
+        socket.on('ready_to_match', () => socket.emit('start_match', { username: state.username }));
+        socket.on('transition_to_table', () => socket.emit('start_match', { username: state.username }));
+        socket.on('game_result', (data) => { appendMessage(`Round ${data.round} is complete.`, 'System', 'system'); });
+        socket.on('game_error', (data) => {
+            state.actionLocked = false;
+            const status = $('game-status');
+            if (status) status.textContent = data.message || 'That action was not accepted.';
+            document.querySelectorAll('.action-button, .guess-row button').forEach((button) => { button.disabled = false; });
+        });
     </script>
 </body>
 </html>

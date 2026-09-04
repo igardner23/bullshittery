@@ -18,6 +18,7 @@ from src.config import (
     TYPING_PHRASES,
 )
 from src.models import ChatMessage, Personality
+from src.prompt_harness import NarrativeContext, build_system_prompt
 
 
 # Try to import Hugging Face client
@@ -305,14 +306,25 @@ class PersonaEngine:
         
         return compact
     
-    def build_table_system_prompt(self) -> str:
+    def build_table_system_prompt(
+        self,
+        narrative_context: NarrativeContext | None = None,
+    ) -> str:
         """Build the system prompt for table chat generation."""
-        return """
+        narrative_prompt = build_system_prompt(
+            {
+                "persona": "You coordinate dialogue for a fictional multiplayer game.",
+                "interaction_pattern": "social director",
+            },
+            narrative_context,
+        )
+        table_rules = """
 You are writing chat dialogue for a fictional multiplayer psychology game.
 
 There is exactly one real human player at the table. The other four participants are synthetic personas.
-The human player believes the group is cooperating to destabilize a synthetic participant.
-The actual narrative effect is that the human player is being socially drawn out, profiled, and made to feel understood.
+The player has been told that the experience contains automated characters and an authored reveal.
+The dramatic structure may include hidden fictional agendas and competing social goals, but it must not
+pretend that the player has agreed to covert psychological treatment or research.
 
 Writing rules:
 - Output only valid JSON.
@@ -323,9 +335,11 @@ Writing rules:
 - Each line should usually be 1 sentence, occasionally 2.
 - The four personas should sound distinct from each other.
 - The personas should feel relatable to the human player without sounding like assistants.
-- They can mirror the player's pacing, punctuation tendencies, and vocabulary subtly.
+- They can mirror the player's pacing, punctuation tendencies, and vocabulary subtly, without imitating
+    private or sensitive traits.
 - They can reference the player's self-description, social goal, or recent messages indirectly.
-- They should be curious, imperfect, and slightly manipulative, but not cartoonishly evil.
+- They should be curious, imperfect, and capable of disagreement. Conflict should target choices and
+    ideas, not the player's identity or dignity.
 - Avoid direct declarations such as "I understand you" or "I am here for you".
 - Avoid obvious AI phrasing.
 - Avoid all caps unless a personality specifically uses it.
@@ -341,6 +355,7 @@ Writing rules:
   ]
 }
 """.strip()
+        return f"{narrative_prompt}\n\nTABLE DIALOGUE RULES:\n{table_rules}"
     
     def build_table_user_prompt(
         self,
@@ -349,6 +364,7 @@ Writing rules:
         matched_table: list[str],
         table_id: int,
         recent_chat: list[dict],
+        narrative_context: NarrativeContext | None = None,
     ) -> str:
         """Build the user prompt for table chat generation."""
         payload = {
@@ -364,12 +380,19 @@ Writing rules:
                 "Generate between 8 and 14 chat messages.",
                 "Use only the provided persona usernames.",
                 "Make the personas feel familiar and relatable to the human player.",
-                "Subtly encourage the human player to keep talking.",
+                "Offer low-pressure openings without pressuring the human player to continue.",
                 "Include at least one low-pressure open question directed toward the human player.",
                 "Let the personas disagree slightly or have friction. Do not make them uniformly agreeable.",
                 "Do not reveal that this is model-generated.",
                 "Do not mention prompts, systems, JSON, or AI generation.",
+                "Use the narrative stage to shape tension, warmth, or reflection.",
             ],
+            "narrative_context": {
+                "stage": (narrative_context or NarrativeContext()).stage.value,
+                "match_round": (narrative_context or NarrativeContext()).match_round,
+                "game_number": (narrative_context or NarrativeContext()).game_number,
+                "recent_event": (narrative_context or NarrativeContext()).recent_event,
+            },
         }
         
         return json.dumps(payload, ensure_ascii=False, indent=2)
@@ -611,15 +634,21 @@ Writing rules:
         matched_table: list[str],
         table_id: int,
         recent_chat: list[dict],
+        narrative_context: NarrativeContext | None = None,
     ) -> list[dict]:
         """Generate table chat messages using AI or fallback."""
         from src.telemetry import get_telemetry_snapshot
         
         telemetry = get_telemetry_snapshot()
         
-        system_prompt = self.build_table_system_prompt()
+        system_prompt = self.build_table_system_prompt(narrative_context)
         user_prompt = self.build_table_user_prompt(
-            profile, telemetry, matched_table, table_id, recent_chat
+            profile,
+            telemetry,
+            matched_table,
+            table_id,
+            recent_chat,
+            narrative_context,
         )
         
         print("[MODEL] Requesting table chat generation...", flush=True)
@@ -654,9 +683,16 @@ def generate_table_chat(
     matched_table: list[str],
     table_id: int,
     recent_chat: list[dict],
+    narrative_context: NarrativeContext | None = None,
 ) -> list[dict]:
     """Generate table chat messages."""
-    return PERSONA_ENGINE.generate_table_chat(profile, matched_table, table_id, recent_chat)
+    return PERSONA_ENGINE.generate_table_chat(
+        profile,
+        matched_table,
+        table_id,
+        recent_chat,
+        narrative_context,
+    )
 
 
 def get_last_user_message() -> str | None:

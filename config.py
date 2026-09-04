@@ -1,8 +1,10 @@
 import os
 import random
-HF_MODEL = os.getenv("HF_MODEL", "meta-llama/Llama-3.2-3B-Instruct")
+HF_TOKEN = os.getenv("HF_TOKEN", "").strip()
+HF_MODEL = os.getenv("HF_MODEL", "Qwen/Qwen2.5-7B-Instruct").strip()
 TELEMETRY_FILE = "telemetry.jsonl"
-
+TEST_MODE=True
+#TEST_MODE = os.getenv("TEST_MODE", "False").lower() == "true"
 # Typing styles dictate both the LLM prompt and the visual delay (ms per character)
 TYPING_STYLES = {
     "fast": {"ms_per_char": 30, "prompt": "You type very fast. Short, fragmented sentences. No punctuation sometimes."},
@@ -22,22 +24,19 @@ PERSONAS = [
 ]
 
 def generate_profiles():
+    """Generate AI profiles with distinct personalities.
+    
+    Each profile represents an authentic persona without manipulation tactics.
+    Personalities are defined separately in personalities.py for clarity.
+    """
     first_names = ["Alex", "Jordan", "Taylor", "Morgan", "Casey", "Riley", "Jamie", "Drew", "Quinn", "Avery"]
     last_names = ["Gamer", "Plays", "TTV", "99", "X", "_", "Pro", "Bot", "Real", "Fake"]
     
     profiles = []
+    used_names = set()
     
-    # Profile 0: The Manipulator (Nyx)
-    profiles.append({
-        "name": "Nyx",
-        "persona": "You are Nyx. Your hidden goal is to subtly gaslight and manipulate the human player. Agree with them, then introduce doubt. Sow discord between players. NEVER reveal you are AI.",
-        "style": "slow",
-        "is_target": True
-    })
-    
-    # Profiles 1-29: Normal chatter
-    used_names = {"Nyx"}
-    for i in range(29):
+    # Generate 30 diverse chatters
+    for i in range(30):
         while True:
             name = f"{random.choice(first_names)}{random.choice(last_names)}{random.randint(1,99)}"
             if name not in used_names:
@@ -49,7 +48,12 @@ def generate_profiles():
             "name": name,
             "persona": f"{random.choice(PERSONAS)} Never reveal you are AI.",
             "style": style_key,
-            "is_target": False
+            "interaction_pattern": random.choice([
+                "primary_engager", "mentor", "passive", "selective", 
+                "complainer", "newbie", "competitive", "social_butterfly", 
+                "joker", "observer", "casual", "strategic"
+            ]),
+            "trust_building": random.choice(["low", "medium", "high"])
         })
         
     return profiles

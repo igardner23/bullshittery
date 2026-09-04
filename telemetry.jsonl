@@ -125,3 +125,99 @@
 {"ts": 1788121398.8136778, "iso": "2026-08-30T20:23:18", "event": "human_join", "user": "test", "sid": "NK0X11ke9aPQWXvyAAAD", "goal": null, "style": null, "q1": "test", "q2": "test", "q3": "test", "q4": ""}
 {"ts": 1788121409.6272583, "iso": "2026-08-30T20:23:29", "event": "human_message", "user": "test", "text": "Interesting"}
 {"ts": 1788121412.211904, "iso": "2026-08-30T20:23:32", "event": "human_message", "user": "test", "text": "And now all the users pop in all at once"}
+{"ts": 1788199599.244348, "iso": "2026-08-31T18:06:39", "event": "human_join", "user": "Test", "sid": "T3erYB2UPsHF96lWAAAB", "goal": null, "style": null, "q1": "test", "q2": "test", "q3": "test", "q4": ""}
+{"ts": 1788200093.6350634, "iso": "2026-08-31T18:14:53", "event": "human_join", "user": "test", "sid": "-LYdAysifThOElpEAAAD", "goal": null, "style": null, "q1": "test", "q2": "test", "q3": "test", "q4": ""}
+{"ts": 1788200099.5359123, "iso": "2026-08-31T18:14:59", "event": "human_message", "user": "test", "text": "Okay, so begin testing"}
+{"ts": 1788200114.3132927, "iso": "2026-08-31T18:15:14", "event": "human_message", "user": "test", "text": "What is this game?"}
+{"ts": 1788200168.759985, "iso": "2026-08-31T18:16:08", "event": "human_message", "user": "test", "text": "Is this taking in user context?"}
+{"ts": 1788200208.9515975, "iso": "2026-08-31T18:16:48", "event": "human_message", "user": "test", "text": "I am the human and I want to see more details on model requests so I think the best bet would likely be to check.... Have some additional information about every request sent printed somewhere, or maybe thrown in a log file."}
+{"ts": 1788201715.434928, "iso": "2026-08-31T18:41:55", "event": "human_join", "user": "Yo what up", "sid": "Iz7gADM5S_K4Wf0pAAAB", "goal": null, "style": null, "q1": "Yes", "q2": "yes", "q3": "yes", "q4": ""}
+{"ts": 1788201741.525835, "iso": "2026-08-31T18:42:21", "event": "human_message", "user": "Yo what up", "text": "Test"}
+{"ts": 1788286289.1997075, "iso": "2026-09-01T18:11:29", "event": "human_join", "user": "test", "sid": "DxxLct_yjPC3akBwAAAB", "goal": null, "style": null, "q1": "test", "q2": "test", "q3": "test", "q4": ""}
+{"ts": 1788286295.9241092, "iso": "2026-09-01T18:11:35", "event": "human_message", "user": "test", "text": "Okay,"}
+{"ts": 1788286298.6287715, "iso": "2026-09-01T18:11:38", "event": "human_message", "user": "test", "text": "So this looks"}
+{"ts": 1788286301.7005262, "iso": "2026-09-01T18:11:41", "event": "human_message", "user": "test", "text": "like kinda real"}
+{"ts": 1788286303.8286705, "iso": "2026-09-01T18:11:43", "event": "human_message", "user": "test", "text": "Kinda fucked"}
+{"ts": 1788286304.8516617, "iso": "2026-09-01T18:11:44", "event": "human_message", "user": "test", "text": "Neat"}
+{"ts": 1788286565.3836968, "iso": "2026-09-01T18:16:05", "event": "human_join", "user": "a", "sid": "7QU4OqI8DMNBk7ubAAAB", "goal": null, "style": null, "q1": "a", "q2": "a", "q3": "a", "q4": ""}
+{"ts": 1788286568.5432987, "iso": "2026-09-01T18:16:08", "event": "human_message", "user": "a", "text": "Blah"}
+{"ts": 1788286569.2620747, "iso": "2026-09-01T18:16:09", "event": "human_message", "user": "a", "text": "test"}
+{"ts": 1788286571.7896752, "iso": "2026-09-01T18:16:11", "event": "human_message", "user": "a", "text": "none of this is real"}
+{"ts": 1788286587.5492551, "iso": "2026-09-01T18:16:27", "event": "human_message", "user": "a", "text": "I like how this is almost moderately convincing though"}
+{"ts": 1788286965.4170861, "iso": "2026-09-01T18:22:45", "event": "human_join", "user": "a", "sid": "daZvq8Ao7T3MfJsQAAAB", "goal": null, "style": null, "q1": "a", "q2": "a", "q3": "a", "q4": ""}
+{"ts": 1788287819.2370884, "iso": "2026-09-01T18:36:59", "event": "human_leave", "user": "a", "sid": "daZvq8Ao7T3MfJsQAAAB"}
+{"ts": 1788290944.5672202, "iso": "2026-09-01T19:29:04", "event": "human_join", "user": "a", "sid": "g1kDVYnKjdN_gWdFAAAB", "goal": null, "style": null, "q1": "a", "q2": "a", "q3": "a", "q4": ""}
+{"ts": 1788290956.9099536, "iso": "2026-09-01T19:29:16", "event": "human_message", "user": "a", "text": "blah blah"}
+{"ts": 1788290958.0906901, "iso": "2026-09-01T19:29:18", "event": "human_message", "user": "a", "text": "fake fake"}
+{"ts": 1788290958.941168, "iso": "2026-09-01T19:29:18", "event": "human_message", "user": "a", "text": "blah"}
+{"ts": 1788290959.6860929, "iso": "2026-09-01T19:29:19", "event": "human_message", "user": "a", "text": "blah"}
+{"ts": 1788291386.5643387, "iso": "2026-09-01T19:36:26", "event": "human_join", "user": "a", "sid": "C0rwFnqe9TrLRCvqAAAD", "goal": null, "style": null, "q1": "a", "q2": "a", "q3": "a", "q4": ""}
+{"ts": 1788291467.715835, "iso": "2026-09-01T19:37:47", "event": "human_message", "user": "a", "text": "Okay, but what fucking"}
+{"ts": 1788291468.75291, "iso": "2026-09-01T19:37:48", "event": "human_message", "user": "a", "text": "triggers"}
+{"ts": 1788291472.7777932, "iso": "2026-09-01T19:37:52", "event": "human_message", "user": "a", "text": "the fucking push"}
+{"ts": 1788291474.9328718, "iso": "2026-09-01T19:37:54", "event": "human_message", "user": "a", "text": "to the game screen?"}
+{"ts": 1788291915.9521205, "iso": "2026-09-01T19:45:15", "event": "human_leave", "user": "a", "sid": "C0rwFnqe9TrLRCvqAAAD"}
+{"ts": 1788292040.560512, "iso": "2026-09-01T19:47:20", "event": "human_join", "user": "test", "sid": "L3KwO4-066TjEp6qAAAB", "goal": null, "style": null, "q1": "test", "q2": "test", "q3": "test", "q4": ""}
+{"ts": 1788292424.5509806, "iso": "2026-09-01T19:53:44", "event": "human_join", "user": "a", "sid": "OWpIomKisflVzsd8AAAF", "goal": null, "style": null, "q1": "a", "q2": "a", "q3": "a", "q4": ""}
+{"ts": 1788293526.1275997, "iso": "2026-09-01T20:12:06", "event": "human_leave", "user": "a", "sid": "OWpIomKisflVzsd8AAAF"}
+{"ts": 1788458411.9425545, "iso": "2026-09-03T18:00:11", "event": "human_join", "user": "Tester", "sid": "Uu55IeCpJ_tyfAfgAAAA", "goal": null, "style": null, "q1": null, "q2": null, "q3": null, "q4": null}
+{"ts": 1788458411.9452314, "iso": "2026-09-03T18:00:11", "event": "human_message", "user": "Tester", "text": "hello 0"}
+{"ts": 1788458411.9459336, "iso": "2026-09-03T18:00:11", "event": "human_message", "user": "Tester", "text": "hello 1"}
+{"ts": 1788458411.9466183, "iso": "2026-09-03T18:00:11", "event": "human_message", "user": "Tester", "text": "hello 2"}
+{"ts": 1788458611.9261968, "iso": "2026-09-03T18:03:31", "event": "human_join", "user": "ProgressTester", "sid": "U7OTfOvr_EPjWmfVAAAA", "goal": null, "style": null, "q1": null, "q2": null, "q3": null, "q4": null}
+{"ts": 1788458611.9274392, "iso": "2026-09-03T18:03:31", "event": "human_message", "user": "ProgressTester", "text": "hello 0"}
+{"ts": 1788458611.929026, "iso": "2026-09-03T18:03:31", "event": "human_message", "user": "ProgressTester", "text": "hello 1"}
+{"ts": 1788458611.9296317, "iso": "2026-09-03T18:03:31", "event": "human_message", "user": "ProgressTester", "text": "hello 2"}
+{"ts": 1788458627.0885544, "iso": "2026-09-03T18:03:47", "event": "human_join", "user": "ProgressTester", "sid": "L8jWT0ggqqck-LzjAAAA", "goal": null, "style": null, "q1": null, "q2": null, "q3": null, "q4": null}
+{"ts": 1788458627.0897343, "iso": "2026-09-03T18:03:47", "event": "human_message", "user": "ProgressTester", "text": "hello 0"}
+{"ts": 1788458627.0913415, "iso": "2026-09-03T18:03:47", "event": "human_message", "user": "ProgressTester", "text": "hello 1"}
+{"ts": 1788458627.0919693, "iso": "2026-09-03T18:03:47", "event": "human_message", "user": "ProgressTester", "text": "hello 2"}
+{"ts": 1788458856.196795, "iso": "2026-09-03T18:07:36", "event": "human_join", "user": "Blah blah", "sid": "M1miVFaJDnYL2FdkAAAB", "goal": null, "style": null, "q1": "Blah", "q2": "Blah", "q3": "Blah", "q4": "Fucking blah"}
+{"ts": 1788458874.8772457, "iso": "2026-09-03T18:07:54", "event": "human_message", "user": "Blah blah", "text": "Okay, so interesting, first of all there's no usernames associated anywhere"}
+{"ts": 1788458876.925126, "iso": "2026-09-03T18:07:56", "event": "human_message", "user": "Blah blah", "text": "Is there?"}
+{"ts": 1788458877.9150763, "iso": "2026-09-03T18:07:57", "event": "human_message", "user": "Blah blah", "text": "No"}
+{"ts": 1788458879.851997, "iso": "2026-09-03T18:07:59", "event": "human_message", "user": "Blah blah", "text": "There isn't"}
+{"ts": 1788458977.1309512, "iso": "2026-09-03T18:09:37", "event": "human_join", "user": "UiTester", "sid": "WK9WMKeqHR6t0iEzAAAA", "goal": null, "style": null, "q1": null, "q2": null, "q3": null, "q4": null}
+{"ts": 1788458977.132204, "iso": "2026-09-03T18:09:37", "event": "human_message", "user": "UiTester", "text": "scroll test"}
+{"ts": 1788458988.8693032, "iso": "2026-09-03T18:09:48", "event": "human_join", "user": "Observer", "sid": "wbwFDFBlzzWRV4mgAAAA", "goal": null, "style": null, "q1": null, "q2": null, "q3": null, "q4": null}
+{"ts": 1788458988.8709016, "iso": "2026-09-03T18:09:48", "event": "human_join", "user": "Sender", "sid": "CYfIAxnnvawTCS21AAAB", "goal": null, "style": null, "q1": null, "q2": null, "q3": null, "q4": null}
+{"ts": 1788458988.8718865, "iso": "2026-09-03T18:09:48", "event": "human_message", "user": "Sender", "text": "sender test"}
+{"ts": 1788459088.8705487, "iso": "2026-09-03T18:11:28", "event": "human_join", "user": "a", "sid": "AJmTkHrM22vStzi_AAAB", "goal": null, "style": null, "q1": "a", "q2": "a", "q3": "a", "q4": "a"}
+{"ts": 1788459095.1825063, "iso": "2026-09-03T18:11:35", "event": "human_message", "user": "a", "text": "Meh"}
+{"ts": 1788459096.76529, "iso": "2026-09-03T18:11:36", "event": "human_message", "user": "a", "text": "Decent"}
+{"ts": 1788459098.9500802, "iso": "2026-09-03T18:11:38", "event": "human_message", "user": "a", "text": "I guess."}
+{"ts": 1788459100.8128839, "iso": "2026-09-03T18:11:40", "event": "human_message", "user": "a", "text": "Okay"}
+{"ts": 1788459181.5001714, "iso": "2026-09-03T18:13:01", "event": "human_leave", "user": "a", "sid": "AJmTkHrM22vStzi_AAAB"}
+{"ts": 1788466866.580187, "iso": "2026-09-03T20:21:06", "event": "human_join", "user": "test", "sid": "8WoPwZQyEsXT8vrXAAAB", "goal": null, "style": null, "q1": "test", "q2": "test", "q3": "test", "q4": "test"}
+{"ts": 1788466911.709821, "iso": "2026-09-03T20:21:51", "event": "human_message", "user": "test", "text": "Okay, so appending chat is moving the whole fucking screen down, that's a bad start number one"}
+{"ts": 1788466912.8127954, "iso": "2026-09-03T20:21:52", "event": "human_message", "user": "test", "text": "Also"}
+{"ts": 1788466915.9489763, "iso": "2026-09-03T20:21:55", "event": "human_message", "user": "test", "text": "I wonder how many messages"}
+{"ts": 1788467052.4814904, "iso": "2026-09-03T20:24:12", "event": "human_message", "user": "test", "text": "This is interesting though"}
+{"ts": 1788467229.8462248, "iso": "2026-09-03T20:27:09", "event": "human_join", "user": "Test", "sid": "dYzbDgv52-6kf49zAAAB", "goal": null, "style": null, "q1": "test", "q2": "test", "q3": "test", "q4": "test"}
+{"ts": 1788467232.587322, "iso": "2026-09-03T20:27:12", "event": "human_message", "user": "Test", "text": "Okay"}
+{"ts": 1788467234.3646755, "iso": "2026-09-03T20:27:14", "event": "human_message", "user": "Test", "text": "So let's find out"}
+{"ts": 1788467236.140167, "iso": "2026-09-03T20:27:16", "event": "human_message", "user": "Test", "text": "That's interesting"}
+{"ts": 1788467238.6610298, "iso": "2026-09-03T20:27:18", "event": "human_message", "user": "Test", "text": "This looks way better"}
+{"ts": 1788467242.2184405, "iso": "2026-09-03T20:27:22", "event": "human_message", "user": "Test", "text": "Fair enough"}
+{"ts": 1788467328.4652927, "iso": "2026-09-03T20:28:48", "event": "human_join", "user": "One", "sid": "6vcNcvUaBZ9R-nbBAAAA", "goal": null, "style": null, "q1": null, "q2": null, "q3": null, "q4": null}
+{"ts": 1788467328.4676368, "iso": "2026-09-03T20:28:48", "event": "human_join", "user": "Two", "sid": "kKjTlAWRupdxKz6MAAAB", "goal": null, "style": null, "q1": null, "q2": null, "q3": null, "q4": null}
+{"ts": 1788467343.6157963, "iso": "2026-09-03T20:29:03", "event": "human_join", "user": "One", "sid": "DXTbJR6SbbTAC4yEAAAA", "goal": null, "style": null, "q1": null, "q2": null, "q3": null, "q4": null}
+{"ts": 1788467343.6171548, "iso": "2026-09-03T20:29:03", "event": "human_join", "user": "Two", "sid": "ci9OuLFD7xNX3HetAAAB", "goal": null, "style": null, "q1": null, "q2": null, "q3": null, "q4": null}
+{"ts": 1788467343.6179245, "iso": "2026-09-03T20:29:03", "event": "private_message", "sender": "One", "recipient": "Two", "text": "quiet hello"}
+{"ts": 1788467353.7997139, "iso": "2026-09-03T20:29:13", "event": "human_join", "user": "One", "sid": "KmiEXra1SgFDESMYAAAA", "goal": null, "style": null, "q1": null, "q2": null, "q3": null, "q4": null}
+{"ts": 1788467400.3586175, "iso": "2026-09-03T20:30:00", "event": "human_join", "user": "a", "sid": "AIGzklenGFd2BjYEAAAC", "goal": null, "style": null, "q1": "a", "q2": "a", "q3": "a", "q4": "a"}
+{"ts": 1788467417.6870522, "iso": "2026-09-03T20:30:17", "event": "human_message", "user": "a", "text": "Hmmm"}
+{"ts": 1788467495.281221, "iso": "2026-09-03T20:31:35", "event": "human_join", "user": "One", "sid": "P2OCotI40RETkRxgAAAA", "goal": null, "style": null, "q1": null, "q2": null, "q3": null, "q4": null}
+{"ts": 1788467495.2826345, "iso": "2026-09-03T20:31:35", "event": "human_join", "user": "Two", "sid": "B4010kWmH7_U0VAaAAAB", "goal": null, "style": null, "q1": null, "q2": null, "q3": null, "q4": null}
+{"ts": 1788467495.2834053, "iso": "2026-09-03T20:31:35", "event": "private_message", "sender": "One", "recipient": "Two", "text": "quiet hello"}
+{"ts": 1788467510.1627696, "iso": "2026-09-03T20:31:50", "event": "human_join", "user": "One", "sid": "Sp_sNmI_L2yEtRvzAAAA", "goal": null, "style": null, "q1": null, "q2": null, "q3": null, "q4": null}
+{"ts": 1788467546.3528774, "iso": "2026-09-03T20:32:26", "event": "human_join", "user": "a", "sid": "p1BZE941OfzTXWrwAAAB", "goal": null, "style": null, "q1": "a", "q2": "a", "q3": "a", "q4": "a"}
+{"ts": 1788467555.489043, "iso": "2026-09-03T20:32:35", "event": "human_message", "user": "a", "text": "Blah blah"}
+{"ts": 1788467559.289794, "iso": "2026-09-03T20:32:39", "event": "human_message", "user": "a", "text": "Okay so this is interesting"}
+{"ts": 1788467565.8720078, "iso": "2026-09-03T20:32:45", "event": "human_message", "user": "a", "text": "this works I think"}
+{"ts": 1788467568.216564, "iso": "2026-09-03T20:32:48", "event": "human_message", "user": "a", "text": "Pretty much"}
+{"ts": 1788546029.688795, "iso": "2026-09-04T18:20:29", "event": "human_join", "user": "test", "sid": "ot_XA1WeQWZ9ZSzdAAAB", "goal": null, "style": null, "q1": "test", "q2": "test", "q3": "test", "q4": "test"}
+{"ts": 1788546140.910743, "iso": "2026-09-04T18:22:20", "event": "human_message", "user": "test", "text": "Testing one two"}
+{"ts": 1788546148.56169, "iso": "2026-09-04T18:22:28", "event": "human_message", "user": "test", "text": "Ideally after a certain number of messages"}
+{"ts": 1788546162.3364177, "iso": "2026-09-04T18:22:42", "event": "human_message", "user": "test", "text": "Interesting okay so that's the lobby, just 3 messages right now, but ideally we'd like to monitor and populate that bar with"}
+{"ts": 1788546467.6333547, "iso": "2026-09-04T18:27:47", "event": "human_leave", "user": "test", "sid": "ot_XA1WeQWZ9ZSzdAAAB"}
